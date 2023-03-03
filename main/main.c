@@ -7,10 +7,6 @@
 #include "esp_camera.h"
 #include "esp_camera_helper.h"
 
-void lookup_task(void *pv) {
-    
-}
-
 void app_main(void)
 {
     if (init_camera() != ESP_OK) {
@@ -23,8 +19,6 @@ void app_main(void)
     sensor->set_framesize(sensor, FRAMESIZE_SVGA);
     sensor->set_pixformat(sensor, PIXFORMAT_JPEG);
     sensor->set_quality(sensor, 10);
-
-    xTaskCreate(lookup_task, "lookup", 4096, NULL, 1, NULL);
 
     connect_wifi();
     if (wifi_connect_status) {
