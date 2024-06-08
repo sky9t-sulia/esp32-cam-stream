@@ -1,0 +1,9 @@
+[submodule "components/esp32-camera"]
+	path = components/esp32-camera
+	url = https://github.com/espressif/esp32-camera.git
+[submodule "components/esp32-cam-helper"]
+	path = components/esp32-cam-helper
+	url = https://github.com/sky9t-sulia/esp32-cam-helper.git
+[submodule "components/ssd1306"]
+	path = components/ssd1306
+	url = https://github.com/sky9t-sulia/ssd1306.git

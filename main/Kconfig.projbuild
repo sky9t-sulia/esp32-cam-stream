@@ -1,0 +1,14 @@
+menu "ESP32-CAM Configuration"
+    menu "Wifi Configuration"
+
+      config WIFI_SSID
+        string "Wifi SSID"
+        default "*******"
+
+      config WIFI_PASSWORD
+        string "Wifi password"
+        default "*******"
+
+    endmenu
+    
+endmenu
