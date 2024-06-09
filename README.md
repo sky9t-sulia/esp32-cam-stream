@@ -4,9 +4,9 @@ This project uses the Freenove ESP32-S3 Camera module to capture images and stre
 
 ## Images
 
-![Camera Module](https://github.com/sky9t-sulia/esp32-cam-stream/blob/main/images/1.jpg?raw=true)
-![Back Side](https://github.com/sky9t-sulia/esp32-cam-stream/blob/main/images/2.jpg?raw=true)
-![Web Interface](https://github.com/sky9t-sulia/esp32-cam-stream/blob/main/images/3.jpg?raw=true)
+![Camera Module](https://github.com/sky9t-sulia/esp32-cam-stream/blob/master/images/1.jpg?raw=true)
+![Back Side](https://github.com/sky9t-sulia/esp32-cam-stream/blob/master/images/2.jpg?raw=true)
+![Web Interface](https://github.com/sky9t-sulia/esp32-cam-stream/blob/master/images/3.jpg?raw=true)
 
 ## Hardware Requirements
 
