@@ -4,10 +4,9 @@ static const char *_STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" 
 static const char *_STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char *_STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
 
-static const char *TAG = "SERVER";
-
 // Create a queue to hold camera frames
 QueueHandle_t frame_queue;
+TaskHandle_t camera_task_handle = NULL;
 
 // This task retrieves frames from the camera and puts them into the queue
 void camera_task(void *pvParameters)
@@ -20,7 +19,6 @@ void camera_task(void *pvParameters)
             continue;
         }
 
-        // Put the frame into the queue, but don't block if the queue is full
         xQueueSend(frame_queue, &frame, 0);
 
         vTaskDelay(10 / portTICK_RATE_MS);
@@ -51,10 +49,12 @@ esp_err_t stream_handler(httpd_req_t *req)
     uint8_t *jpg_buf;
     char *part_buf[64];
 
-    if ((response = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE)) != ESP_OK)
+    if (camera_task_handle == NULL)
     {
-        return response;
+        xTaskCreate(camera_task, "camera_task", 8096, NULL, 5, &camera_task_handle);
     }
+
+    response = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
 
     while (true)
     {
@@ -78,6 +78,11 @@ esp_err_t stream_handler(httpd_req_t *req)
 
         if (response != ESP_OK)
         {
+            if (camera_task_handle != NULL)
+            {
+                vTaskDelete(camera_task_handle);
+                camera_task_handle = NULL;
+            }
             break;
         }
     }
@@ -94,7 +99,8 @@ esp_err_t web_server(httpd_req_t *req)
 {
     const char *filepath = req->uri;
 
-    if (strcmp(filepath, "/") == 0) {
+    if (strcmp(filepath, "/") == 0)
+    {
         filepath = "index.html";
     }
 
@@ -104,15 +110,14 @@ esp_err_t web_server(httpd_req_t *req)
     FILE *file = fopen(fullpath, "r");
     if (file == NULL)
     {
-        ESP_LOGE(TAG, "Failed to open file for reading");
-        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "File not found");
+        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Not found");
         return ESP_FAIL;
     }
 
     const char *ext = strrchr(filepath, '.');
     if (ext == NULL)
     {
-        ESP_LOGE(TAG, "No file extension found");
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "File must have an extension");
         return ESP_FAIL;
     }
 
@@ -128,7 +133,7 @@ esp_err_t web_server(httpd_req_t *req)
 
     if (mime_type == NULL)
     {
-        ESP_LOGE(TAG, "Unsupported file type: %s", ext);
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Unsupported media type");
         return ESP_FAIL;
     }
 
@@ -174,16 +179,16 @@ esp_err_t reboot_handler(httpd_req_t *req)
  * @param req HTTP request
  */
 esp_err_t config_handler(httpd_req_t *req)
-{   
+{
     char response[1024];
     sensor_t *s = esp_camera_sensor_get();
 
     sprintf(
-        response, 
-        "{" \
-            "\"quality\": %d,"      \
-            "\"framesize\": %d,"    \
-            "\"pixformat\": %d"     \
+        response,
+        "{"
+            "\"quality\": %d,"
+            "\"framesize\": %d,"
+            "\"pixformat\": %d"
         "}",
         s->status.quality,
         s->status.framesize,
@@ -218,7 +223,7 @@ esp_err_t set_config_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    cJSON *quality   = cJSON_GetObjectItem(root, "quality");
+    cJSON *quality = cJSON_GetObjectItem(root, "quality");
     cJSON *framesize = cJSON_GetObjectItem(root, "framesize");
     cJSON *pixformat = cJSON_GetObjectItem(root, "pixformat");
 
@@ -226,29 +231,26 @@ esp_err_t set_config_handler(httpd_req_t *req)
 
     if (quality != NULL)
     {
-        ESP_LOGI(TAG, "Setting quality to %d", quality->valueint);
         s->set_quality(s, quality->valueint);
     }
 
     if (framesize != NULL)
     {
-        ESP_LOGI(TAG, "Setting framesize to %d", framesize->valueint);
         s->set_framesize(s, framesize->valueint);
     }
 
     if (pixformat != NULL)
     {
-        ESP_LOGI(TAG, "Setting pixformat to %d", pixformat->valueint);
         s->set_pixformat(s, pixformat->valueint);
     }
 
     cJSON_Delete(root);
 
-    httpd_resp_send(req, "{\"success\": \"OK\"}", 2);
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, "{\"status\": \"OK\"}", 16);
 
     return ESP_OK;
 }
-
 
 httpd_uri_t uri_index = {
     .uri = "/*",
@@ -289,12 +291,9 @@ httpd_handle_t setup_server(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.uri_match_fn = httpd_uri_match_wildcard;
-
     httpd_handle_t server_handler = NULL;
 
     frame_queue = xQueueCreate(10, sizeof(camera_fb_t *));
-
-    xTaskCreate(camera_task, "camera_task", 8096, NULL, 5, NULL);
 
     if (httpd_start(&server_handler, &config) == ESP_OK)
     {

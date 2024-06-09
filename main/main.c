@@ -13,8 +13,6 @@
 static WIFI_t wifi;
 SSD1306_t dev;
 
-static const char *TAG = "MAIN";
-
 void ui_connect_task(void *pvParameter)
 {
     SSD1306_t dev = *(SSD1306_t *)pvParameter;
@@ -22,33 +20,51 @@ void ui_connect_task(void *pvParameter)
     ssd1306_clear_screen(&dev, false);
     ssd1306_contrast(&dev, 0xff);
 
+    int delay = 60 * 5; // 5 minutes
+    int ssid_length = strlen(CONFIG_WIFI_SSID);
+    int previous_state = -1; // -1 indicates no previous state
+
     while (true)
     {
-        ssd1306_display_text(&dev, 0, "Connecting to", 13, false);
-        ssd1306_display_text(&dev, 1, CONFIG_WIFI_SSID, strlen(CONFIG_WIFI_SSID), false);
-        ssd1306_display_text(&dev, 2, "Please wait", 11, false);
+        int current_state = wifi.connected ? 1 : (wifi.failed ? 2 : 0);
 
-        if (wifi.connected)
+        if (current_state != previous_state)
         {
             ssd1306_clear_screen(&dev, false);
-            ssd1306_display_text(&dev, 0, "Connected to", 12, false);
-            ssd1306_display_text(&dev, 1, CONFIG_WIFI_SSID, strlen(CONFIG_WIFI_SSID), false);
-            ssd1306_display_text(&dev, 3, wifi.ip, strlen(wifi.ip), false);
-            break;
+
+            if (current_state == 0)
+            {
+                ssd1306_display_text(&dev, 0, "Connecting to", 13, false);
+                ssd1306_display_text(&dev, 1, CONFIG_WIFI_SSID, ssid_length, false);
+                ssd1306_display_text(&dev, 2, "Please wait", 11, false);
+            } 
+            else if (current_state == 1)
+            {
+                ssd1306_display_text(&dev, 0, "Connected to", 12, false);
+                ssd1306_display_text(&dev, 1, CONFIG_WIFI_SSID, ssid_length, false);
+                ssd1306_display_text(&dev, 3, wifi.ip, strlen(wifi.ip), false);
+            }
+            else if (current_state == 2)
+            {
+                ssd1306_display_text(&dev, 0, "WiFi Fail.", 10, false);
+                ssd1306_display_text(&dev, 2, CONFIG_WIFI_SSID, ssid_length, false);
+            }
+
+            previous_state = current_state;
         }
 
-        if (wifi.failed)
+        delay--;
+
+        // Clear the screen after 5 minutes to prevent burn-in
+        // and to save power
+        if (delay == 0)
         {
             ssd1306_clear_screen(&dev, false);
-            ssd1306_display_text(&dev, 0, "WiFi Fail.", 10, false);
-            ssd1306_display_text(&dev, 2, CONFIG_WIFI_SSID, strlen(CONFIG_WIFI_SSID), false);
             break;
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
-
-    ESP_LOGI(TAG, "Connect Task Finished");
 
     vTaskDelete(NULL);
 }
@@ -65,8 +81,6 @@ void server_task(void *pvParameter)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
-    ESP_LOGI(TAG, "Server Task Finished");
-
     vTaskDelete(NULL);
 }
 
@@ -81,7 +95,6 @@ void setup_task(void *pvParameter)
     {
         ssd1306_clear_screen(&dev, false);
         ssd1306_display_text(&dev, 0, "Camera fail", 11, false);
-        ESP_LOGE(TAG, "Camera fail");
         vTaskDelete(NULL);
     }
 
@@ -96,7 +109,6 @@ void setup_task(void *pvParameter)
     {
         ssd1306_clear_screen(&dev, false);
         ssd1306_display_text(&dev, 0, "SD Card fail", 12, false);
-        ESP_LOGE(TAG, "SD Card fail");
         vTaskDelete(NULL);
     }
 
@@ -110,13 +122,12 @@ void setup_task(void *pvParameter)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
-    ESP_LOGI(TAG, "Setup Task Finished");
-
     vTaskDelete(NULL);
 }
 
 void app_main()
 {
+    // Create a task to setup the camera, sd card, and server
     xTaskCreate(&setup_task, "setup_task", 8192 * 2, NULL, 5, NULL);
 
     // Initialize wifi
