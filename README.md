@@ -1,53 +1,60 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-P4 | ESP32-S2 | ESP32-S3 | Linux |
-| ----------------- | ----- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | ----- |
+# Freenove ESP32-S3 Camera Module Project
 
-# Hello World Example
+This project uses the Freenove ESP32-S3 Camera module to capture images and stream video.
 
-Starts a FreeRTOS task to print "Hello World".
+## Hardware Requirements
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+- Freenove ESP32-S3 Camera module
+- MicroSD card
 
-## How to use example
+## Software Requirements
 
-Follow detailed instructions provided specifically for this example.
+- ESP-IDF v5.0 or later
+- CMake 3.13 or later
 
-Select the instructions depending on Espressif chip installed on your development board:
+## Connect Display
 
-- [ESP32 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html)
-- [ESP32-S2 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
+- SDA -> 47
+- SCL -> 21
 
+## Default GPIO for SDMMC
 
-## Example folder contents
+- CMD -> 38
+- CLK -> 39
+- D0  -> 40
 
-The project **hello_world** contains one source file in C language [hello_world_main.c](main/hello_world_main.c). The file is located in folder [main](main).
+## Configuration
 
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt` files that provide set of directives and instructions describing the project's source files and targets (executable, library, or both).
+Before building the project, you may need to configure some settings. This can be done using the `menuconfig` tool provided by ESP-IDF.
 
-Below is short explanation of remaining files in the project folder.
+1. Navigate to the project directory in your terminal.
+2. Run `idf.py menuconfig`.
+3. You need to configure WiFi settings, SSD1306 display and Camera
 
-```
-├── CMakeLists.txt
-├── pytest_hello_world.py      Python script used for automated testing
-├── main
-│   ├── CMakeLists.txt
-│   └── hello_world_main.c
-└── README.md                  This is the file you are currently reading
-```
+## Building the Project
 
-For more information on structure and contents of ESP-IDF projects, please refer to Section [Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) of the ESP-IDF Programming Guide.
+1. After configuring your settings, you can build the project by running `idf.py build` in the project directory.
+2. Once the build is complete, you can flash the firmware to the ESP32-S3 by running `idf.py -p PORT flash`, replacing `PORT` with the appropriate port for your system.
 
-## Troubleshooting
+## Preparing the SD Card
 
-* Program upload failure
+Before using the module, you need to prepare an SD card with the necessary files:
 
-    * Hardware connection is not correct: run `idf.py -p PORT monitor`, and reboot your board to see if there are any output logs.
-    * The baud rate for downloading is too high: lower your baud rate in the `menuconfig` menu, and try again.
+1. Format the SD card as FAT32.
+2. Copy all files from the `data` folder in the project directory to the root directory of the SD card.
+3. Safely eject the SD card from your computer.
+4. Insert the SD card into the SD card slot on the module.
 
-## Technical support and feedback
+Please ensure that the SD card is inserted into the module before powering it on.
 
-Please use the following feedback channels:
+## Usage
 
-* For technical queries, go to the [esp32.com](https://esp32.com/) forum
-* For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
+After flashing the firmware, the ESP32-S3 will connect to the configured WiFi network and start the web server. The device's IP address will be displayed on the SSD1306 display.
 
-We will get back to you as soon as possible.
+To view the web interface:
+
+1. Note down the IP address displayed on the SSD1306 display.
+2. Open a web browser on a device connected to the same network as the ESP32-S3.
+3. Enter the IP address into the browser's address bar and press Enter.
+
+You should now see the web interface.

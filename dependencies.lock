@@ -1,9 +1,29 @@
 dependencies:
+  espressif/esp32-camera:
+    component_hash: a1933162caca04a3a3bb0dca00bb56fcb3c50cd3779ab2f2b03ad8536e9bd0d0
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 2.0.9
   idf:
     component_hash: null
     source:
       type: idf
     version: 5.2.2
-manifest_hash: 3e6980bc5fca475de2a39d94c3ea3944c0528040d862609e810d1d8f5ea7f661
+  sky9t_sulia/esp32-cam-helper:
+    component_hash: 48fab50a8ef35089ac4abf27e19d477bdc09d3107cfbf48267ed307aee3c69bf
+    source:
+      git: https://github.com/sky9t-sulia/esp32-cam-helper.git
+      path: .
+      type: git
+    version: 987365b283a4777340068fbe45e893dec3b72bdd
+  sky9t_sulia/ssd1306:
+    component_hash: 74b22943db7708d02cda13434f72d53180486ae42d0003327222fcd7aec88888
+    source:
+      git: https://github.com/sky9t-sulia/ssd1306.git
+      path: .
+      type: git
+    version: cc61ff21c6284461a5de6cb6d4930636a0664eb2
+manifest_hash: 325082236b6dcce8cb1827cddc40599e744130d0a8ad02409776dea43087449f
 target: esp32s3
 version: 1.0.0

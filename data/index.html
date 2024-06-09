@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-S3 Camera</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 20px 0;
+        }
+
+        #stream {
+            margin: 20px 0;
+            border: 1px solid #ccc;
+        }
+
+        .control-group {
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .stream-overlay {
+            position: relative;
+            display: inline-block;
+        }
+
+        .stream-overlay img {
+            display: block;
+            width: 100%;
+            min-width: 320px;
+            min-height: 240px;
+            height: auto;
+        }
+
+        .stream-overlay:after {
+            content: "Stream is not running";
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000000;
+        }
+
+        .stream-overlay.active:after {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ESP32-S3 Camera Server</h1>
+
+    <div class="stream-overlay">
+        <img id="stream" src=""/>
+    </div>
+
+    <div class="control-group">
+        <button id="start-stream">Start Stream</button>
+        <button id="stop-stream">Stop Stream</button>
+        <button id="reboot">Reboot</button>
+        <button id="get_status">Get Device Stats</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+
+</html>

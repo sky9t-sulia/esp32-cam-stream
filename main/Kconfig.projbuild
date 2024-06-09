@@ -1,14 +1,23 @@
-menu "ESP32-CAM Configuration"
-    menu "Wifi Configuration"
+menu "WiFi Credentials"
+  config WIFI_SSID
+    string "Wifi SSID"
+    default "*******"
 
-      config WIFI_SSID
-        string "Wifi SSID"
-        default "*******"
+  config WIFI_PASSWORD
+    string "Wifi password"
+    default "*******"
+endmenu
 
-      config WIFI_PASSWORD
-        string "Wifi password"
-        default "*******"
+menu "SD Card"
+  config SD_MMC_CMD
+    int "SD_MMC_CMD"
+    default 38
 
-    endmenu
-    
+  config SD_MMC_CLK
+    int "SD_MMC_CLK"
+    default 39
+
+  config SD_MMC_DAT0
+    int "SD_MMC_DAT0"
+    default 40
 endmenu

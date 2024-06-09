@@ -1,7 +1,6 @@
 .devcontainer
 .vscode
 build
-components
-components/*
 sdkconfig
 sdkconfig.old
+managed_components
