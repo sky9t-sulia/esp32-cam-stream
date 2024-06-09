@@ -41,7 +41,7 @@ Before building the project, you may need to configure some settings. This can b
 Before using the module, you need to prepare an SD card with the necessary files:
 
 1. Format the SD card as FAT32.
-2. Copy all files from the `data` folder in the project directory to the root directory of the SD card.
+2. Copy all files from the `webserver` folder in the project directory to the root directory of the SD card.
 3. Safely eject the SD card from your computer.
 4. Insert the SD card into the SD card slot on the module.
 
