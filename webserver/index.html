@@ -12,10 +12,15 @@
             margin: 0;
             padding: 0;
             text-align: center;
+            background: #f2f2f2;
         }
 
         h1 {
             margin: 20px 0;
+        }
+
+        button {
+            cursor: pointer;
         }
 
         #stream {
@@ -27,11 +32,10 @@
             margin: 20px 0;
         }
 
-        button {
+        .control-group button {
             padding: 10px 20px;
             margin: 10px 10px;
             font-size: 16px;
-            cursor: pointer;
         }
 
         .stream-overlay {
@@ -78,7 +82,19 @@
         <button id="start-stream">Start Stream</button>
         <button id="stop-stream">Stop Stream</button>
         <button id="reboot">Reboot</button>
-        <button id="get_status">Get Device Stats</button>
+    </div>
+
+    <div class="quality">
+        <label for="quality">Quality:</label>
+        <input id="quality" type="number" min="0" max="63" value="10" step="1">
+
+        <label for="framesize">Frame Size:</label>
+        <select id="framesize"></select>
+        
+        <label for="pixformat">Pixel Format:</label>
+        <select id="pixformat"></select>
+
+        <button id="set-config">Update config</button>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

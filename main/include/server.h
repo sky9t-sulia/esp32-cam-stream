@@ -5,6 +5,7 @@
 #include "esp_timer.h"
 #include "esp_log.h"
 #include "esp_camera_helper.h"
+#include <cJSON.h>
 
 typedef struct {
     const char *extension;

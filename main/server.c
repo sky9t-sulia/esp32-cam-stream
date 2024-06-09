@@ -94,6 +94,10 @@ esp_err_t web_server(httpd_req_t *req)
 {
     const char *filepath = req->uri;
 
+    if (strcmp(filepath, "/") == 0) {
+        filepath = "index.html";
+    }
+
     char fullpath[1024];
     sprintf(fullpath, "%s%s", PREFIX, filepath);
 
@@ -165,23 +169,86 @@ esp_err_t reboot_handler(httpd_req_t *req)
 }
 
 /**
- * @brief Status handler for HTTP server
+ * @brief Sensor config handler for HTTP server
  *
  * @param req HTTP request
  */
-esp_err_t status_handler(httpd_req_t *req)
-{
-    // return status of free heap memory and other system parameters
+esp_err_t config_handler(httpd_req_t *req)
+{   
     char response[1024];
+    sensor_t *s = esp_camera_sensor_get();
 
-    sprintf(response, "{\"free_heap\": %lu, \"min_free_heap\": %lu, \"max_alloc_heap\": %u, \"min_alloc_heap\": %u, \"total_alloc_heap\": %d}",
-            esp_get_free_heap_size(), esp_get_minimum_free_heap_size(), heap_caps_get_largest_free_block(MALLOC_CAP_8BIT), heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT), heap_caps_get_total_size(MALLOC_CAP_8BIT));
+    sprintf(
+        response, 
+        "{" \
+            "\"quality\": %d,"      \
+            "\"framesize\": %d,"    \
+            "\"pixformat\": %d"     \
+        "}",
+        s->status.quality,
+        s->status.framesize,
+        s->pixformat
+    );
 
     httpd_resp_set_type(req, "application/json");
     httpd_resp_send(req, response, strlen(response));
 
     return ESP_OK;
 }
+
+/**
+ * @brief Set sensor config handler for HTTP server
+ *
+ * @param req HTTP request
+ */
+esp_err_t set_config_handler(httpd_req_t *req)
+{
+    char content[1024];
+    int content_length = req->content_len;
+    int ret = httpd_req_recv(req, content, content_length);
+
+    if (ret <= 0)
+    {
+        return ESP_FAIL;
+    }
+
+    cJSON *root = cJSON_Parse(content);
+    if (root == NULL)
+    {
+        return ESP_FAIL;
+    }
+
+    cJSON *quality   = cJSON_GetObjectItem(root, "quality");
+    cJSON *framesize = cJSON_GetObjectItem(root, "framesize");
+    cJSON *pixformat = cJSON_GetObjectItem(root, "pixformat");
+
+    sensor_t *s = esp_camera_sensor_get();
+
+    if (quality != NULL)
+    {
+        ESP_LOGI(TAG, "Setting quality to %d", quality->valueint);
+        s->set_quality(s, quality->valueint);
+    }
+
+    if (framesize != NULL)
+    {
+        ESP_LOGI(TAG, "Setting framesize to %d", framesize->valueint);
+        s->set_framesize(s, framesize->valueint);
+    }
+
+    if (pixformat != NULL)
+    {
+        ESP_LOGI(TAG, "Setting pixformat to %d", pixformat->valueint);
+        s->set_pixformat(s, pixformat->valueint);
+    }
+
+    cJSON_Delete(root);
+
+    httpd_resp_send(req, "{\"success\": \"OK\"}", 2);
+
+    return ESP_OK;
+}
+
 
 httpd_uri_t uri_index = {
     .uri = "/*",
@@ -201,10 +268,16 @@ httpd_uri_t uri_reboot = {
     .handler = reboot_handler,
     .user_ctx = NULL};
 
-httpd_uri_t uri_status = {
-    .uri = "/status",
+httpd_uri_t uri_config = {
+    .uri = "/config",
     .method = HTTP_GET,
-    .handler = status_handler,
+    .handler = config_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t uri_set_config = {
+    .uri = "/config",
+    .method = HTTP_POST,
+    .handler = set_config_handler,
     .user_ctx = NULL};
 
 /**
@@ -227,7 +300,8 @@ httpd_handle_t setup_server(void)
     {
         httpd_register_uri_handler(server_handler, &uri_stream);
         httpd_register_uri_handler(server_handler, &uri_reboot);
-        httpd_register_uri_handler(server_handler, &uri_status);
+        httpd_register_uri_handler(server_handler, &uri_config);
+        httpd_register_uri_handler(server_handler, &uri_set_config);
 
         // Register the index handler last so that it is the default handler
         httpd_register_uri_handler(server_handler, &uri_index);
