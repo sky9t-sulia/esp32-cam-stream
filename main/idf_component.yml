@@ -1,7 +1,7 @@
 ## IDF Component Manager Manifest File
 dependencies:
-  sky9t_sulia/ssd1306:
-    git: https://github.com/sky9t-sulia/ssd1306.git
+  sky9t_sulia/esp32-ssd1306:
+    git: https://github.com/sky9t-sulia/esp32-ssd1306.git
   sky9t_sulia/esp32-cam-helper:
     git: https://github.com/sky9t-sulia/esp32-cam-helper.git
   espressif/esp32-camera: "*"

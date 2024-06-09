@@ -17,13 +17,13 @@ dependencies:
       path: .
       type: git
     version: 987365b283a4777340068fbe45e893dec3b72bdd
-  sky9t_sulia/ssd1306:
-    component_hash: 74b22943db7708d02cda13434f72d53180486ae42d0003327222fcd7aec88888
+  sky9t_sulia/esp32-ssd1306:
+    component_hash: 666995958030979de6e650ef506e7077883b5271b2445c094b8e706f987531f1
     source:
-      git: https://github.com/sky9t-sulia/ssd1306.git
+      git: https://github.com/sky9t-sulia/esp32-ssd1306.git
       path: .
       type: git
-    version: cc61ff21c6284461a5de6cb6d4930636a0664eb2
-manifest_hash: 325082236b6dcce8cb1827cddc40599e744130d0a8ad02409776dea43087449f
+    version: 860038d5073d974df0985fc583b56d3145539a97
+manifest_hash: c633013eba7eba07857484868006c7cce35b0067483480e93dcd004c1cdc2a3e
 target: esp32s3
 version: 1.0.0
